@@ -14,7 +14,7 @@ std::size_t calculateNumLines(std::size_t size, std::size_t width)
     return lines;
 }
 
-void showLineMem(uint8_t const* ptr, std::size_t width)
+void showMemLine(uint8_t const* ptr, std::size_t width)
 {
     std::printf("%16p | ", (void*)ptr);
     uint8_t const* ptr2 { ptr };
@@ -43,7 +43,7 @@ void showMemory(uint8_t const* ptr, std::size_t size, std::size_t width)
     std::printf("-----------------|------------------------------------------------\n");
     
     for (std::size_t i{}; i<numLines; ++i) {
-        showLineMem(ptr, width);
+        showMemLine(ptr, width);
         ptr += width;
     }
     std::printf("------------------------------------------------------------------\n\n");

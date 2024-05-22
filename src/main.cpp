@@ -10,10 +10,14 @@ struct Vect_t {
 
 int main(void)
 {
+// To show all data members of Vect_t (stack)
     Vect_t m_vec { .vec {1, 2, 4, 8, 16, 32} };
-    showMemoryObject(m_vec);
-    showMemoryObject(m_vec.vec);
+    showMemoryObject(m_vec, sizeof(m_vec));
 
+// To show only data members of std::vector (stack)
+    showMemoryObject(m_vec.vec, sizeof(m_vec.vec));
+
+// To show the data stored by std::vector (heap)
     std::size_t size {48};
     std::printf("\n************************* Size object: %lu ************************\n\n", size);
     showMemory(reinterpret_cast<uint8_t const*>(&*m_vec.vec.begin()), size);
