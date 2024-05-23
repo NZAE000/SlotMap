@@ -1,4 +1,7 @@
-#include "showMemory.hpp"
+#include "memoryviewer.hpp"
+
+
+namespace MEMVIEWER {
 
 std::size_t calculateNumLines(std::size_t size, std::size_t width)
 {
@@ -48,3 +51,5 @@ void showMemory(uint8_t const* ptr, std::size_t size, std::size_t width)
     }
     std::printf("------------------------------------------------------------------\n\n");
 }
+
+} // namespace VIEWER {

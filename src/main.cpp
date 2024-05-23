@@ -1,4 +1,4 @@
-#include "util/showMemory.hpp"
+#include "util/memoryviewer.hpp"
 #include<array>
 #include<vector>
 
@@ -12,13 +12,13 @@ int main(void)
 {
 // To show all data members of Vect_t (stack)
     Vect_t m_vec { .vec {1, 2, 4, 8, 16, 32} };
-    showMemoryObject(m_vec, sizeof(m_vec));
+    MEMVIEWER::show(m_vec, sizeof(m_vec));
 
 // To show only data members of std::vector (stack)
-    showMemoryObject(m_vec.vec, sizeof(m_vec.vec));
+    MEMVIEWER::show(m_vec.vec, sizeof(m_vec.vec));
 
 // To show the data stored by std::vector (heap)
-    showMemoryObject(*m_vec.vec.begin(), 48);
+    MEMVIEWER::show(*m_vec.vec.begin(), 48);
 
 //    // To show how the array is stored in memory (stack).
 //    std::array arr { 1, 2, 4, 8, 16, 32, 64};
