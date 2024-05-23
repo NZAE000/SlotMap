@@ -1,24 +1,32 @@
 #include "util/memoryviewer.hpp"
+#include "slotmap.hpp"
 #include<array>
 #include<vector>
 
-struct Vect_t {
-    char const begin[16] = "##BEGIN-VECTOR#";
-    std::vector<int> vec;
-    char const end[16] = "###END-VECTOR##";
+//struct Vect_t {
+//    char const begin[16] = "##BEGIN-VECTOR#";
+//    std::vector<int> vec;
+//    char const end[16] = "###END-VECTOR##";
+//};
+
+struct SomeCmp_t {
+    char const name[8];
 };
 
 int main(void)
 {
-// To show all data members of Vect_t (stack)
-    Vect_t m_vec { .vec {1, 2, 4, 8, 16, 32} };
-    MEMVIEWER::show(m_vec, sizeof(m_vec));
+    ENGINE::Slotmap_t<SomeCmp_t, 4> somecmp;
+    MEMVIEWER::show(somecmp, sizeof(somecmp));
 
-// To show only data members of std::vector (stack)
-    MEMVIEWER::show(m_vec.vec, sizeof(m_vec.vec));
-
-// To show the data stored by std::vector (heap)
-    MEMVIEWER::show(*m_vec.vec.begin(), 48);
+//// To show all data members of Vect_t (stack)
+//    Vect_t m_vec { .vec {1, 2, 4, 8, 16, 32} };
+//    MEMVIEWER::show(m_vec, sizeof(m_vec));
+//
+//// To show only data members of std::vector (stack)
+//    MEMVIEWER::show(m_vec.vec, sizeof(m_vec.vec));
+//
+//// To show the data stored by std::vector (heap)
+//    MEMVIEWER::show(*m_vec.vec.begin(), 48);
 
 //    // To show how the array is stored in memory (stack).
 //    std::array arr { 1, 2, 4, 8, 16, 32, 64};
