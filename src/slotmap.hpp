@@ -1,6 +1,8 @@
 #pragma once 
 #include<cstdint>
 #include<array>
+#include<cassert>
+#include<stdexcept>
 
 namespace ENGINE {
 
@@ -19,7 +21,7 @@ struct Slotmap_t {
     [[nodiscard]] constexpr uint_type size()     const noexcept { return size_;    } // Attibute 'nodiscard': means that the return of method can't be ignored.
     [[nodiscard]] constexpr uint_type capacity() const noexcept { return CAPACITY; }
 
-    [[nodiscard]] constexpr key_type insert(element_type&& element) noexcept
+    [[nodiscard]] constexpr key_type insert(element_type&& element)
     {
         uint_type key_pos { occupyFreeKey() };
 
@@ -38,8 +40,11 @@ struct Slotmap_t {
 
 private:
 
-    [[nodiscard]] constexpr uint_type occupyFreeKey() noexcept
-    {
+    [[nodiscard]] constexpr uint_type occupyFreeKey()
+    {   
+        if (size_ >= CAPACITY) throw std::runtime_error("Insufficient capacity in slotmap"); // Run time error
+        assert(freelist_ < CAPACITY); // Only verify with debug
+
         uint_type free_pos { freelist_ };           // Save the unoccupied key position
         key_type& free_key { indices_[free_pos] };  // Get unoccupied key
         freelist_ = free_key.id_;                   // Update freelist

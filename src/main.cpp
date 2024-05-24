@@ -31,6 +31,12 @@ int main(void)
     MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
     std::printf("key_user3 (%ld %ld)\n", key3.id_, key3.gen_);
 
+    [[maybe_unused]] auto key4 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp4"});
+    MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    std::printf("key_user4 (%ld %ld)\n", key4.id_, key4.gen_);
+
+    //[[maybe_unused]] auto key5 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp5"});
+
 //// To show all data members of Vect_t (stack)
 //    Vect_t m_vec { .vec {1, 2, 4, 8, 16, 32} };
 //    MEMVIEWER::show(m_vec, sizeof(m_vec));
