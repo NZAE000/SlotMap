@@ -10,13 +10,16 @@
 //};
 
 struct SomeCmp_t {
-    char const name[8];
+    char some[8] = {"none"};
 };
 
 int main(void)
 {
-    ENGINE::Slotmap_t<SomeCmp_t, 4> somecmp;
-    MEMVIEWER::show(somecmp, sizeof(somecmp));
+    ENGINE::Slotmap_t<SomeCmp_t, 4> sltmap_of_somecmp{};
+    
+    MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    auto key =  sltmap_of_somecmp.insert(SomeCmp_t{"some"});
+    MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
 
 //// To show all data members of Vect_t (stack)
 //    Vect_t m_vec { .vec {1, 2, 4, 8, 16, 32} };
