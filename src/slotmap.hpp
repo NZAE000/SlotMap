@@ -13,7 +13,7 @@ struct Slotmap_t {
 
     explicit constexpr Slotmap_t() noexcept
     {
-        freeElements_init();
+        freeKeys_init();
     }
 
     [[nodiscard]] constexpr uint_type size()     const noexcept { return size_;    } // Attibute 'nodiscard': means that the return of method can't be ignored.
@@ -51,7 +51,7 @@ private:
         return free_pos;
     }
 
-    constexpr void freeElements_init() noexcept
+    constexpr void freeKeys_init() noexcept
     {
         // Set next_free for each key
         uint_type next_free {1};

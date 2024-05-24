@@ -2,6 +2,7 @@
 #include "slotmap.hpp"
 #include<array>
 #include<vector>
+#include<cstdio>
 
 //struct Vect_t {
 //    char const begin[16] = "##BEGIN-VECTOR#";
@@ -16,10 +17,19 @@ struct SomeCmp_t {
 int main(void)
 {
     ENGINE::Slotmap_t<SomeCmp_t, 4> sltmap_of_somecmp{};
-    
     MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
-    auto key =  sltmap_of_somecmp.insert(SomeCmp_t{"some"});
+
+    [[maybe_unused]] auto key1 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp1"});
     MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    std::printf("key_user1 (%ld %ld)\n", key1.id_, key1.gen_);
+
+    [[maybe_unused]] auto key2 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp2"});
+    MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    std::printf("key_user2 (%ld %ld)\n", key2.id_, key2.gen_);
+
+    [[maybe_unused]] auto key3 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp3"});
+    MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    std::printf("key_user3 (%ld %ld)\n", key3.id_, key3.gen_);
 
 //// To show all data members of Vect_t (stack)
 //    Vect_t m_vec { .vec {1, 2, 4, 8, 16, 32} };
