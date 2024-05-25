@@ -21,15 +21,22 @@ struct Slotmap_t {
     [[nodiscard]] constexpr uint_type size()     const noexcept { return size_;    } // Attibute 'nodiscard': means that the return of method can't be ignored.
     [[nodiscard]] constexpr uint_type capacity() const noexcept { return CAPACITY; }
 
-    [[nodiscard]] constexpr key_type insert(element_type&& element)
+// ITERATORS TO DATA
+    [[nodiscard]] constexpr auto begin()  const noexcept { return data_.begin();          }
+    [[nodiscard]] constexpr auto end()    const noexcept { return data_.begin() + size_;  }
+    [[nodiscard]] constexpr auto cbegin() const noexcept { return data_.cbegin();         }
+    [[nodiscard]] constexpr auto cend()   const noexcept { return data_.cbegin() + size_; }
+
+// INSERT
+    [[nodiscard]] constexpr key_type insert(element_type&& element) // R-values only!, no universal reference (the type is deducted already).
     {
-        uint_type key_pos { occupyFreeKey() };
+        uint_type key_pos { occupy_freeKey() };
 
         // Insert element
         data_[size_]  = std::move(element); // Move resource
         erase_[size_] = key_pos;
 
-        // Do key for user
+        // Make key for user
         key_type key_user { key_pos, generation_ };
 
         // Update generation and size
@@ -38,9 +45,64 @@ struct Slotmap_t {
         return key_user;  // Return key for the user
     }
 
+// ERASE
+    constexpr bool erase(key_type const& key_user) noexcept
+    {
+        bool erase_okey {false};
+
+        if (is_valid(key_user)) 
+        {
+            uint_type pos_data { liberate_key(key_user) };
+            erase_element(pos_data);
+
+            --size_;            // Update size
+            erase_okey = true;  // Successful deletion
+        }
+        return erase_okey;
+    }
+
 private:
 
-    [[nodiscard]] constexpr uint_type occupyFreeKey()
+    constexpr void erase_element(uint_type pos_data) noexcept
+    {
+        // Get position of end element
+        uint_type end_pos {size_ - 1};
+
+        // If the element is in the mid, replace it with the end element
+        if (pos_data < end_pos) 
+        {
+            // Copy end element to current
+            data_[pos_data]  = data_[end_pos];
+            erase_[pos_data] = erase_[end_pos];
+
+            // Then, you have to update its corresponding element in the array indices_
+            indices_[erase_[pos_data]].id_ = pos_data;
+
+        }  // The element is the end, nothing to do.
+    }
+
+    [[nodiscard]] constexpr uint_type liberate_key(key_type const& key_user) noexcept
+    {
+        // Accessing the key object to free
+        key_type& key_to_free { indices_[key_user.id_] };
+
+        // Before to free, store id_ (corresponds to the position where the element to be removed is, and value to return)
+        uint_type pos_data { key_to_free.id_ };
+
+        // Free key and update freelist
+        key_to_free.id_  = freelist_;
+        key_to_free.gen_ = std::numeric_limits<uint_type>::max();    // Assuming that the generation never reaches the maximum value!
+        freelist_        = key_user.id_;
+
+        return pos_data;
+    }
+
+    constexpr bool is_valid(key_type const& key_user) const noexcept
+    {
+        return (key_user.id_ < CAPACITY && indices_[key_user.id_].gen_ == key_user.gen_);
+    }
+
+    [[nodiscard]] constexpr uint_type occupy_freeKey()
     {   
         if (size_ >= CAPACITY) throw std::runtime_error("Insufficient capacity in slotmap"); // Run time error
         assert(freelist_ < CAPACITY); // Only verify with debug

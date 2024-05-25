@@ -19,24 +19,50 @@ int main(void)
     ENGINE::Slotmap_t<SomeCmp_t, 4> sltmap_of_somecmp{};
     MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
 
+    [[maybe_unused]] auto key0 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp0"});
+    //MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    std::printf("key_user0 (%ld %ld)\n", key0.id_, key0.gen_);
+
     [[maybe_unused]] auto key1 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp1"});
-    MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    //MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
     std::printf("key_user1 (%ld %ld)\n", key1.id_, key1.gen_);
 
     [[maybe_unused]] auto key2 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp2"});
-    MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    //MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
     std::printf("key_user2 (%ld %ld)\n", key2.id_, key2.gen_);
 
     [[maybe_unused]] auto key3 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp3"});
     MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
-    std::printf("key_user3 (%ld %ld)\n", key3.id_, key3.gen_);
+    std::printf("key_user3 (%ld %ld)\n\n", key3.id_, key3.gen_);
+
+    //[[maybe_unused]] auto key5 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp5"});
+
+    // DELETE SOME KEY!
+    std::printf("ERASE key_user0 (%ld %ld)\n", key0.id_, key0.gen_);
+    if (sltmap_of_somecmp.erase(key0)){
+        MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    }
+
+    std::printf("ERASE key_user0 (%ld %ld)\n", key0.id_, key0.gen_);
+    if (!sltmap_of_somecmp.erase(key0)){
+        std::printf("invalid key\n\n");
+    }
+
+    std::printf("ERASE key_user2 (%ld %ld)\n", key2.id_, key2.gen_);
+    if (sltmap_of_somecmp.erase(key2)){
+        MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    }
+
+    std::printf("ERASE key_user3 (%ld %ld)\n", key3.id_, key3.gen_);
+    if (sltmap_of_somecmp.erase(key3)){
+        MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
+    }
 
     [[maybe_unused]] auto key4 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp4"});
     MEMVIEWER::show(sltmap_of_somecmp, sizeof(sltmap_of_somecmp));
     std::printf("key_user4 (%ld %ld)\n", key4.id_, key4.gen_);
 
-    //[[maybe_unused]] auto key5 = sltmap_of_somecmp.insert(SomeCmp_t{"cmp5"});
-
+    for (auto const& cmp : sltmap_of_somecmp) std::printf("%s ", cmp.some);
 //// To show all data members of Vect_t (stack)
 //    Vect_t m_vec { .vec {1, 2, 4, 8, 16, 32} };
 //    MEMVIEWER::show(m_vec, sizeof(m_vec));
