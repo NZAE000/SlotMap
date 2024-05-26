@@ -63,6 +63,13 @@ int main(void)
     std::printf("key_user4 (%ld %ld)\n", key4.id_, key4.gen_);
 
     for (auto const& cmp : sltmap_of_somecmp) std::printf("%s ", cmp.some);
+
+    SomeCmp_t const& cmp1  = sltmap_of_somecmp[key1];
+    std::printf("\ncmp getted: %s\n", cmp1.some);
+
+    //SomeCmp_t& cmp3  = sltmap_of_somecmp[key3];  // BAD! CMP3 DELETED ABOVE
+    //std::printf("\ncmp getted: %s\n", cmp3.some);
+
 //// To show all data members of Vect_t (stack)
 //    Vect_t m_vec { .vec {1, 2, 4, 8, 16, 32} };
 //    MEMVIEWER::show(m_vec, sizeof(m_vec));

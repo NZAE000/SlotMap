@@ -61,6 +61,23 @@ struct Slotmap_t {
         return erase_okey;
     }
 
+// ACCESS TO ELEMENT WITH KEY
+    constexpr element_type const& operator[](key_type const& key_user) const noexcept
+    {
+        assert( is_valid(key_user) ); // Verify only debugging
+
+        // Accessing the key object and get id_ (position if data to get)
+        uint_type pos_data { indices_[key_user.id_].id_ };
+
+        return data_[pos_data];
+    }
+
+    constexpr element_type& operator[](key_type const& key_user) noexcept
+    {
+        element_type const& element { const_cast<Slotmap_t const*>(this)->operator[](key_user) };
+        return *const_cast<element_type*>(&element);
+    }
+
 private:
 
     constexpr void erase_element(uint_type pos_data) noexcept
