@@ -1,17 +1,19 @@
 #pragma once 
 #include<cstdint>
 #include<array>
-#include<cassert>
 #include<stdexcept>
+
+//#define NDEBUG
+#include<cassert>
 
 namespace ENGINE {
 
-template<typename DATA_TYPE, std::size_t CAPACITY>
+template<typename DATA_TYPE, std::size_t CAPACITY=10, typename INDEX_TYPE=std::size_t>
 struct Slotmap_t {
 
-    using element_type = DATA_TYPE;
-    using uint_type    = std::size_t;
-    using key_type     = struct { uint_type id_; uint_type gen_; };
+    using data_type = DATA_TYPE;
+    using uint_type = INDEX_TYPE;
+    using key_type  = struct { uint_type id_; uint_type gen_; };
 
     explicit constexpr Slotmap_t() noexcept
     {
@@ -22,27 +24,22 @@ struct Slotmap_t {
     [[nodiscard]] constexpr uint_type capacity() const noexcept { return CAPACITY; }
 
 // ITERATORS TO DATA
-    [[nodiscard]] constexpr auto begin()  const noexcept { return data_.begin();          }
-    [[nodiscard]] constexpr auto end()    const noexcept { return data_.begin() + size_;  }
-    [[nodiscard]] constexpr auto cbegin() const noexcept { return data_.cbegin();         }
-    [[nodiscard]] constexpr auto cend()   const noexcept { return data_.cbegin() + size_; }
+    [[nodiscard]] constexpr typename std::array<DATA_TYPE, CAPACITY>::iterator begin()              noexcept { return data_.begin();          }
+    [[nodiscard]] constexpr typename std::array<DATA_TYPE, CAPACITY>::iterator end()                noexcept { return data_.begin() + size_;  }
+    [[nodiscard]] constexpr typename std::array<DATA_TYPE, CAPACITY>::const_iterator cbegin() const noexcept { return data_.cbegin();         }
+    [[nodiscard]] constexpr typename std::array<DATA_TYPE, CAPACITY>::const_iterator cend()   const noexcept { return data_.cbegin() + size_; }
 
 // INSERT
-    [[nodiscard]] constexpr key_type insert(element_type&& element) // R-values only!, no universal reference (the type is deducted already).
+    [[nodiscard]] constexpr key_type insert(data_type&& element) // R-values only!, no universal reference (the type is deducted already).
     {
         uint_type key_pos { occupy_freeKey() };
 
         // Insert element
-        data_[size_]  = std::move(element); // Move resource
-        erase_[size_] = key_pos;
+        data_ [size_- 1] = std::move(element); // Move resource
+        erase_[size_- 1] = key_pos;
 
-        // Make key for user
-        key_type key_user { key_pos, generation_ };
-
-        // Update generation and size
-        ++generation_; ++size_;
-    
-        return key_user;  // Return key for the user
+        // Make key for user and return
+        return key_type { key_pos, generation_ };
     }
 
 // ERASE
@@ -62,9 +59,9 @@ struct Slotmap_t {
     }
 
 // ACCESS TO ELEMENT WITH KEY
-    constexpr element_type const& operator[](key_type const& key_user) const noexcept
+    constexpr data_type const& operator[](key_type const& key_user) const noexcept
     {
-        assert( is_valid(key_user) ); // Verify only debugging
+        assert( is_valid(key_user) && "Invalid key user" ); // Verify only debugging
 
         // Accessing the key object and get id_ (position if data to get)
         uint_type pos_data { indices_[key_user.id_].id_ };
@@ -72,10 +69,10 @@ struct Slotmap_t {
         return data_[pos_data];
     }
 
-    constexpr element_type& operator[](key_type const& key_user) noexcept
+    constexpr data_type& operator[](key_type const& key_user) noexcept
     {
-        element_type const& element { const_cast<Slotmap_t const*>(this)->operator[](key_user) };
-        return *const_cast<element_type*>(&element);
+        data_type const& element { const_cast<Slotmap_t const*>(this)->operator[](key_user) };
+        return *const_cast<data_type*>(&element);
     }
 
 private:
@@ -100,6 +97,8 @@ private:
 
     [[nodiscard]] constexpr uint_type liberate_key(key_type const& key_user) noexcept
     {
+        assert( is_valid(key_user) ); // Verify only debugging
+
         // Accessing the key object to free
         key_type& key_to_free { indices_[key_user.id_] };
 
@@ -108,7 +107,7 @@ private:
 
         // Free key and update freelist
         key_to_free.id_  = freelist_;
-        key_to_free.gen_ = std::numeric_limits<uint_type>::max();    // Assuming that the generation never reaches the maximum value!
+        key_to_free.gen_ = MAX_VALUE_;    // Assuming that the generation never reaches the maximum value!
         freelist_        = key_user.id_;
 
         return pos_data;
@@ -128,9 +127,9 @@ private:
         key_type& free_key { indices_[free_pos] };  // Get unoccupied key
         freelist_ = free_key.id_;                   // Update freelist
     
-        // Occupy key
-        free_key.id_  = size_;          // size_ is the position of the new element in data[]!
-        free_key.gen_ = generation_;
+        // Occupy key and update generation and size
+        free_key.id_  = size_++;          // size_ is the position of the new element in data[]!
+        free_key.gen_ = ++generation_;    // Tracing
 
         return free_pos;
     }
@@ -148,19 +147,24 @@ private:
     std::array<key_type,     CAPACITY> indices_{};
 
     char const b_data[16]   = "DATA###########";
-    std::array<element_type, CAPACITY> data_{};      // Cmps!
+    std::array<data_type, CAPACITY> data_{};      // Cmps!
 
     char const b_erase[16]   = "ERASE##########";
     std::array<uint_type,    CAPACITY> erase_{};
 
-    char const b_gen[8]    = "GEN####";
-    uint_type generation_{0};
-
     char const b_free[8]   = "FREE###";
     uint_type freelist_{0};
 
+    char const b_gen[8]    = "GEN####";
+    uint_type generation_{0};
+
     char const b_size[8]   = "SIZE###";
     uint_type size_{0};
+
+    char const b_capacity[8] = "CAPA###";
+    uint_type capa_{CAPACITY};
+
+    static constexpr uint_type MAX_VALUE_ { std::numeric_limits<uint_type>::max() };
 };
 
 } // namespace ENGINE
