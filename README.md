@@ -3,9 +3,9 @@ This work consists of how to implement a data structure called 'slotmap' for the
 Slotmap autor: Allan Deutsch. See video: https://www.youtube.com/watch?v=SHaAR7XPtNU.
 
 # HOW TO RUN
-## Compile: make -j
-## Execute: ./exec
-## Clean: make clean
+    Compile: make -j
+    Execute: ./exec
+    Clean: make clean
 
 # DOCUMENTATION: HOW THE SLOTMAP IS IMPLEMENTED
 
