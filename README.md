@@ -1,28 +1,24 @@
-# SlotMap
-This work consists of how to implement a data structure called slotmap for the management of resources such as components in an engine. First, what is done before the implementation of the slotmap is to be able to see our data in memory, which first implements a utility that will allow the visualization of the data in memory through the console.
+# Slotmap structure
+This work consists of how to implement a data structure called 'slotmap' for the management of resources such as components (data) in an engine. First, what is done before the implementation of the slotmap is to be able to see our data in memory, which first implements a utility named 'memviewer' that will allow the visualization of the data in memory through the console.
+Slotmap autor: Allan Deutsch. See video: https://www.youtube.com/watch?v=SHaAR7XPtNU.
 
-NOTA PARA IMPLEMENTAR SLOTMAP:
+# HOW TO RUN
+## Compile: make -j
+## Execute: ./exec
+## Clean: make clean
 
-    Miembros de un Slotmap: { freelist, indices[ {id_, gen_},.. ], generation, data[], erase[] }
+# DOCUMENTATION: HOW THE SLOTMAP IS IMPLEMENTED
 
-INSERTAR:
- 1. Obtener la posición disponible en el arreglo de componentes(data[]) mediante 'data.size()', siendo la misma posición en el arreglo de posiciones al arreglo indices[] (erase[]).
- 2. Crear variables 'id' y 'gen', tal que al 'id' se le asigna la posición hallada anteriormente y a 'gen' se le asigna el valor de generación actual. Luego se aumenta generación actual (++current_gen).
- 3. Ya listo las variable 'id' y 'gen', se debe saber cual es la primera posición libre en 'indices[]' para asignar tales valores al elemento libre en tal posición libre. 
- Para ello, primero se debe actualizar el valor del miembro 'freelist': se copia el valor de 'freelist' en una variable 'free_pos', se accede al elemento libre en 'free_pos' del arreglo indices[] y se actualiza el 'freelist' con el valor del miembro 'id_' del elemento libre.
- Luego, se asigna los valores de las variable 'id' y 'gen' en los miembros 'id_' y 'gen_' del elemento libre.
- 4. Se inserta el componente en el arreglo de componentes (data[]) y se inserta el valor de 'free_pos' en el arreglo de posiciones al slotmap (erase[]).
- 5. Devolver un objeto 'key' al usuario (key { key_pos ('free_pos'), gen }).
+    Slotmap members: { freelist, indices[ {id_, gen_}, ... ], generation, data[], erase[], size, capacity }
 
-BORRAR:
- 1. Para borrar un componente, el usuario debe entreagr la 'key' completa ( { key_pos, gen } ).
- 2. Acceder al objeto {id_, gen_} ubicado en 'key.key_pos' del arreglo indices[].
- 3. Verificar que key.gen == gen_ y key.id_ < capacidad para saber que la 'key' dada es correcta, de lo contrario lanzar error(nunca debería ser incorrecta).
- 4. Guardar el valor de 'id_' en una variable 'id', ya que corresponde a la posición donde esta el componente a eliminar.
- 5. Dejar el objeto {id_, gen_} libre, entonces asignar el valor de 'freelist' al miembro 'id_' y actualizar 'freelist' con el valor de 'key.key_pos'. 
- 6. Eliminar el componente ubicado en la posición 'id' del data[] y eliminar el elemento que representa la posición al indices[] ubicado en la posición 'id' del erase[].
+## INSERT:
+ 1. The user provides the element to be inserted.
+ 2. A free slot key must be used: obtain the position of the first available slot key (key_index) from the value of 'freelist'.
+ 3. Then, 'freelist' must be updated: retrieve the free slot key ('indices[key_index]') and assign the free slot key's 'id_' value to 'freelist'. Do not forget to update 'size' and 'generation'.
+ 4. Insert the element into 'data' at the next available position ('size - 1'), store 'key_index' in 'erase' at the available position to keep track of the slot key associated with the element, and return the key to the user ({key_index, gen}).
 
- SI VARIABLE 'id' ES LA POSICIÓN DE UN COMPONENTE AL MEDIO DE 'data[]': 
-  7. Mover el ultimo componente a la posicón 'id' en data[] y mover el ultimo elemento de erase[] a la poisicón 'id'.
-  8. Como el componente fue movido, por ende tiene otra posicón en data[], entonces hay que actualizar su elemento correspondiente en el arreglo indices[], tal que para acceder a ese objeto {id_, gen_} es necesario la posición, la cual es el elemento movido en la posición 'id' en el arreglo erase[]. Entonces, guardar el valor erase['id'] en una variable 'key_pos'.
-  9. Acceder al objeto {id_, gen_} ubicado en 'key_pos' y actualizar el miembro 'id_' con el valor de 'id'.
+## ERASE:
+ 1. To remove an element, the user must provide the complete key ({ key_index, gen }).
+ 2. Verify that the key is valid ('key_index < capacity' and 'gen == indices[key_index].gen_'); otherwise, give an error (this should never happen unless there is an implementation bug).
+ 3. Free the slot key and update 'freelist': obtain the slot key using position 'key_index' in 'indices', store the slot key's 'id_' value in a variable (index_data), since it corresponds to the position of the element to be removed. Assign the value of 'freelist' to the slot key's 'id_' member and update 'freelist' to 'key_index'.
+ 6. Remove the element: if index_data is the last position, do nothing. Otherwise, copy the last element of 'data' into position index_data, and do the same for the last element of 'erase'. Then, access the slot key using the position stored in erase ('erase[index_data]') and update its 'id_' value to the new position (index_data) associated with the moved element.
